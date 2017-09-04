@@ -82,7 +82,7 @@
       </v-card-title>
       <v-card-text>
 
-        <v-alert warning v-model="displayFilterWarning">
+        <v-alert warning transition="scale-transition" :value="displayFilterWarning">
           <li v-for="alert in filterAlerts">
               {{ alert }}
           </li>

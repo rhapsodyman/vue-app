@@ -1,5 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import { SET_FILTER, SET_FILTERS, SET_ENABLED,  SET_CATEGORY_ENABLED } from './mutation_types'
+
 
 Vue.use(Vuex)
 
@@ -32,25 +34,25 @@ const store = new Vuex.Store({
   },
 
   mutations: {
-    setFilter( state, filter ){
+    [SET_FILTER]( state, filter ){
       var ind = state.filters.findIndex(f => f.label === filter.label)
 
       if(ind == -1) state.filters.push(filter)
       else Vue.set(state.filters, ind, filter)
     },
 
-    setFilters( state, filters ){
+    [SET_FILTERS]( state, filters ){
       state.filters = filters
     },
 
-    setEnabled( state, {filterLabel, enabled} ){
+    [SET_ENABLED]( state, {filterLabel, enabled} ){
       var ind = state.filters.findIndex(f => f.label === filterLabel)
       if (ind != -1) {
         Vue.set(state.filters[ind], 'enabled', enabled);
       }
     },
 
-    setCategoryEnabled( state, {categoryName, enabled} ){
+    [SET_CATEGORY_ENABLED]( state, {categoryName, enabled} ){
       state.dependantCategoriesVisibility[categoryName] = enabled
 
     },
@@ -58,19 +60,19 @@ const store = new Vuex.Store({
 
   actions: {
     setFilter( { commit }, filter) {
-      commit('setFilter', filter)
+      commit(SET_FILTER, filter)
     },
 
     setFilters( { commit }, filters) {
-      commit('setFilters', filters)
+      commit(SET_FILTERS, filters)
     },
 
     setEnabled( { commit }, {filterLabel, enabled}) {
-      commit('setEnabled', {filterLabel, enabled})
+      commit(SET_ENABLED, {filterLabel, enabled})
     },
 
     setCategoryEnabled( { commit }, {categoryName, enabled}) {
-      commit('setCategoryEnabled', {categoryName, enabled})
+      commit(SET_CATEGORY_ENABLED, {categoryName, enabled})
     },
   }
 })
