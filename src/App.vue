@@ -3,7 +3,7 @@
     <v-toolbar dark class="primary" :fixed="toolbarFixed">
       <v-toolbar-title>Some Title</v-toolbar-title>
       <v-toolbar-items>
-        <v-btn flat @click.native.stop = "importDialog = true">Import</v-btn>
+        <v-btn flat @click.native.stop = "openImportDialog">Import</v-btn>
         <v-btn flat @click.native.stop = "calculateAndShowExportFilters(1)">Export</v-btn>
         <v-btn flat>Info</v-btn>
       </v-toolbar-items>
@@ -57,7 +57,7 @@
     </v-layout>
   </div>
 
-  <v-dialog v-model="saveDialog">
+  <v-dialog v-model="saveDialog" width="400">
     <v-card>
       <v-card-title>
         <div class="headline">Exported Filters</div>
@@ -75,12 +75,19 @@
     </v-card>
   </v-dialog>
 
-  <v-dialog v-model="importDialog">
+  <v-dialog v-model="importDialog" width="400">
     <v-card>
       <v-card-title>
         <div class="headline">Import</div>
       </v-card-title>
       <v-card-text>
+
+        <v-alert warning v-model="displayFilterWarning">
+          <li v-for="alert in filterAlerts">
+              {{ alert }}
+          </li>
+        </v-alert>
+
         <textarea rows="10" ref="pastedFilters" placeholder="Paste filters here"></textarea>
       </v-card-text>
       <v-card-actions>
@@ -115,6 +122,9 @@ import config from '../data/config'
         loadingResults : false,
         hideDetails : true,
         showMultileg: false,
+        displayFilterWarning: false,
+        warningMessage: '',
+        filterAlerts: [],
 
         headers: [
           { text: 'Symbol', value: 'symbol' },
@@ -168,43 +178,66 @@ import config from '../data/config'
         return arr.join('|')
       },
 
+      openImportDialog () {
+        this.importDialog = true
+        this.displayFilterWarning = false
+        this.filterAlerts = []
+      },
+
+
       importFilters () {
-        var source = this.$refs.pastedFilters.value
+        this.displayFilterWarning = false
+        this.filterAlerts = []
+
+        var source = this.$refs.pastedFilters.value.trim()
         var filters = []
 
+        var noErrors = true
         var lines = source.split(/\r?\n/)
         for (var i = 0; i < lines.length; i++) {
           var arr = lines[i].trim().split('=')
 
-          var filterType = this.getFilterTypeByName(arr[0])
+          var foundFilter = this.getFilterByName(arr[0])
 
-          if (filterType != undefined) {
-            var filter = {
+          if (foundFilter != undefined) {
+            var newFilter = {
               label: arr[0],
               enabled: true
             }
             var value = arr[1]
-            if (filterType == 'MultiSelect') value = value.split(',')
-            filter.value = value
-            filters.push(filter)
+            if (foundFilter.type == 'MultiSelect') value = value.split(',')
+            newFilter.value = value
+            filters.push(newFilter)
+          }
+          else {
+            noErrors = false
+            this.filterAlerts.push('Unknown filter ' + arr[0])
           }
         }
-        // add to store
-        this.$store.dispatch('setFilters', filters )
-        this.importDialog = false
+
+        if (!noErrors) {
+          this.displayFilterWarning = true
+        }
+        else {
+          // add to store
+          console.log(filters);
+          this.$store.dispatch('setFilters', filters )
+          this.importDialog = false
+        }
       },
+
 
       clearAllFilters () {
         this.$store.dispatch('setFilters', [] )
       },
 
-    getFilterTypeByName (nameToFind) {
+    getFilterByName (nameToFind) {
       var sections = this.sections
       for (var secInd = 0; secInd < sections.length; secInd++) {
         var section = sections[secInd]
         for (var fInd = 0; fInd < section.filters.length; fInd++) {
           if (section.filters[fInd].bindName === nameToFind) {
-            return section.filters[fInd].type
+            return section.filters[fInd]
           }
         }
       }
