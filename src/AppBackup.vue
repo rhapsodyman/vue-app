@@ -1,15 +1,15 @@
 <template>
-  <v-app :dark="!lightTheme">
+  <v-app light>
     <v-toolbar dark class="primary" fixed>
       <v-toolbar-title>Some Title</v-toolbar-title>
       <v-toolbar-items>
         <v-btn flat @click.native.stop = "openImportDialog">Import</v-btn>
-        <v-btn flat @click.native.stop = "openExportDialog">Export</v-btn>
+        <v-btn flat @click.native.stop = "calculateAndShowExportFilters(1)">Export</v-btn>
         <v-btn flat>Info</v-btn>
       </v-toolbar-items>
     </v-toolbar>
     <main>
-      <v-container fluid>
+      <v-container>
         <v-layout row wrap>
           <filter-section v-for='section in sections'
               v-show='calculateSectionIsShown(section)'
@@ -23,8 +23,8 @@
     <div id='bottomPanel'>
       <v-layout column>
         <v-flex lg6 offset-lg3>
-          <v-card class='pt-0'>
-            <v-card-text class='pt-0'>
+          <v-card class='pt-0 pb-0'>
+            <v-card-text class='pt-0 pb-0'>
               <v-layout row justify-space-around>
                 <v-slider label="Num" hide-details v-bind:max="10" v-model="numberOfSymbolsToFetch"></v-slider>
                 <v-text-field
@@ -34,55 +34,32 @@
                 ></v-text-field>
                 <v-btn
                     primary
+                    :loading="loadingResults"
+                    :disabled="loadingResults"
                     @click.native="getResults"
                 >Search</v-btn>
-                <v-btn primary @click.native="tabsVisibility = !tabsVisibility">Toggle</v-btn>
+                <v-btn primary @click.native="tableVisibility = !tableVisibility">Toggle</v-btn>
                 <v-btn primary @click.native="clearAllFilters">Reset Filters</v-btn>
               </v-layout>
 
-              <v-tabs v-show="tabsVisibility == true" class="pt-3" dark v-model="activeTab">
-                <v-tabs-bar>
-                  <v-tabs-item
-                      v-for="tab in tabsLabels"
-                      :key="tab"
-                      :href="'#' + tab"
-                      ripple
-                  >
-                  {{ tab }}
-                </v-tabs-item>
-                <v-tabs-slider class="yellow"></v-tabs-slider>
-              </v-tabs-bar>
-              <v-tabs-items>
-                <v-tabs-content
-                    v-for="tab in tabsLabels"
-                    :key="tab"
-                    :id="tab"
-                    >
-
-                  <div id="sentFilters">{{ currentTabFilters }}</div>
-
-                <v-data-table
-                      :loading="resultsAreLoading"
-                      v-bind:headers="headers"
-                      :items="currentTabResults"
-                      class="elevation-1"
-                      :rows-per-page-items="rowsPerPageArray"
-                >
-                <template slot="items" scope="props">
-                  <td class="text-xs-right">{{ props.item.symbol }}</td>
-                  <td class="text-xs-right">{{ props.item.description }}</td>
-                  <td class="text-xs-right">{{ props.item.price }}</td>
-                </template>
-              </v-data-table>
-            </v-tabs-content>
-          </v-tabs-items>
-        </v-tabs>
-
-      </v-card-text>
-    </v-card>
-  </v-flex>
-</v-layout>
-</div>
+              <v-data-table
+                  v-show='tableVisibility == true'
+                  v-bind:headers="headers"
+                  :items="tableItems"
+                  class="elevation-1"
+                  :rows-per-page-items="rowsPerPageArray"
+              >
+              <template slot="items" scope="props">
+                <td class="text-xs-right">{{ props.item.symbol }}</td>
+                <td class="text-xs-right">{{ props.item.description }}</td>
+                <td class="text-xs-right">{{ props.item.price }}</td>
+              </template>
+            </v-data-table>
+          </v-card-text>
+        </v-card>
+      </v-flex>
+    </v-layout>
+  </div>
 
   <v-dialog v-model="saveDialog" width="400">
     <v-card>
@@ -97,12 +74,8 @@
             v-model="showMultileg"
             hide-details
         ></v-checkbox>
-        <textarea ref="exportedFilters" rows="10">{{exportedFilters}}</textarea>
+        <textarea rows="10">{{exportedFilters}}</textarea>
       </v-card-text>
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn primary @click.native.stop = "copyToClipboard">Copy</v-btn>
-      </v-card-actions>
     </v-card>
   </v-dialog>
 
@@ -145,17 +118,13 @@ import config from '../data/config'
         importDialog : false,
         exportedFilters : '',
         numberOfSymbolsToFetch : 1,
-        tabsVisibility : false,
+        tableVisibility : false,
         loadingResults : false,
         showMultileg: false,
         displayFilterWarning: false,
         warningMessage: '',
         filterAlerts: [],
         rowsPerPageArray: [5],
-        tabsLabels: [],
-        activeTab: null,
-        tabsData: {},
-        lightTheme: true,
 
         headers: [
           { text: 'Symbol', value: 'symbol' },
@@ -163,6 +132,7 @@ import config from '../data/config'
           { text: 'Price', value: 'price' },
 
         ],
+        tableItems: []
       }
     },
 
@@ -174,11 +144,6 @@ import config from '../data/config'
           visible = this.$store.getters.getCategoriesVisibility[section.categoryName]
         }
         return visible
-      },
-
-      openExportDialog () {
-        this.showMultileg = false
-        this.calculateAndShowExportFilters(1)
       },
 
       onShowMultilegSwitch (value){
@@ -258,6 +223,7 @@ import config from '../data/config'
 
         if (noWarnings) {
           // add to store
+          //console.log(filters);
           this.$store.dispatch('setFilters', filters )
           this.importDialog = false
         }
@@ -309,57 +275,23 @@ import config from '../data/config'
 
     getResults () {
       // here fisrt of all need to pass arguments
-      var filtersToSend = this.calculateExportFilters(this.numberOfSymbolsToFetch)
-      var filtersToShow = this.calculateExportFilters(1)
-
-
-      var rightNow = new Date();
-      var newTab = rightNow.toISOString().slice(11).replace('Z', '')
-
-      this.tabsVisibility = true
-      //var newTab = 'TAB ' + (this.tabsLabels.length + 1)
-      this.tabsLabels.unshift(newTab)
-      this.activeTab = newTab
-
-      this.$set(this.tabsData, newTab,
-        {
-          loading: true,
-          results: [],
-          filters: filtersToShow
-        }
-      )
+      //var filters = this.calculateExportFilters(this.numberOfSymbolsToFetch)
+      // then display results
+      this.loadingResults = true
+      this.tableVisibility = false
 
       axios.get(config.resultsUrl)  // or window.filtersUrl
         .then(response => {
             // console.info(response.data)
-            this.tabsData[newTab].loading = false
-            this.tabsData[newTab].results = response.data
+            this.tableItems = response.data
+            this.loadingResults = false
+            this.tableVisibility = true
         })
       .catch(error => {
         console.log('Error fetching and parsing data', error);
-        this.tabsData[newTab].loading = false
+        this.loadingResults = false
+        this.tableVisibility = true
       });
-    },
-
-    copyToClipboard () {
-      var input = this.$refs.exportedFilters
-       input.select();
-       document.execCommand("copy");
-    }
-  },
-
-
-  computed : {
-    currentTabResults () {
-      return this.tabsData[this.activeTab].results
-    },
-
-    resultsAreLoading () {
-      return this.tabsData[this.activeTab].loading == true
-    },
-
-    currentTabFilters () {
-      return this.tabsData[this.activeTab].filters
     }
   },
 
@@ -380,13 +312,6 @@ import config from '../data/config'
     textarea {
       width: 100%;
     }
-
-    #sentFilters {
-      margin: 10px auto;
-      text-align: center;
-
-    }
-
     #bottomPanel {
       width: 100%;
       padding-left: 16px;

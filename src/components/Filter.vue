@@ -6,7 +6,7 @@
                 class='pb-0 pt-0'
                 v-bind:label="filter.filterLabel"
                 v-model="checkBoxValue"
-                :hide-details='hideDetails'
+                hide-details
                 color="primary"
             ></v-checkbox>
 
@@ -18,7 +18,7 @@
                 v-model='selected'
                 multiple
                 chips
-                :hide-details='hideDetails'
+                hide-details
               ></v-select>
 
           <v-select
@@ -29,7 +29,7 @@
               label="Select"
               :hint='filter.filterLabel'
               single-line
-              :hide-details='hideDetails'
+              hide-details
           ></v-select>
 
           <v-switch
@@ -37,7 +37,7 @@
              class='pb-1 pt-3'
              :label="`${stateOfSwitch.toString()}`"
              v-model="selected"
-             :hide-details='hideDetails'
+             hide-details
              color="primary"
           ></v-switch>
 
@@ -46,7 +46,7 @@
              class='pb-1 pt-3'
              v-model="selected"
              :label='filter.filterLabel'
-             :hide-details='hideDetails'
+             hide-details
           ></v-text-field>
         </v-layout>
       </v-card-text>
@@ -57,9 +57,7 @@
 export default {
   props: ['filter'],
   data () {
-    return {
-      hideDetails: true
-    }
+    return { }
   },
 
   computed: {

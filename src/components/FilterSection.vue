@@ -1,6 +1,6 @@
 <template>
       <v-flex xs12 lg6>
-        <v-card class='mt-2 mb-2'>
+        <v-card>
           <v-card-title  class='pb-0 pr-0 pt-0 title'>{{sectionLabel}}</v-card-title>
             <v-card-text class='pt-1 pr-1 pb-1 pl-1'>
               <app-filter v-for='filter in filters'
