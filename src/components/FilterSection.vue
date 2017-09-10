@@ -1,13 +1,17 @@
 <template>
       <v-flex xs12 lg6>
-        <v-card>
-          <v-card-title  class='pb-0 pr-0 pt-0 title'>{{sectionLabel}}</v-card-title>
-            <v-card-text class='pt-1 pr-1 pb-1 pl-1'>
-              <app-filter v-for='filter in filters'
+        <v-card class='mt-3 mr-2'>
+          <v-card-title
+              class='pb-0 pr-0 pt-0 title'>
+              {{sectionLabel}}
+          </v-card-title>
+          <v-card-text class='pt-1 pr-1 pb-1 pl-1'>
+              <app-filter
+                  v-for='filter in filters'
                   :filter='filter'
                   :key='filter.bindName'
               ></app-filter>
-            </v-card-text>
+          </v-card-text>
         </v-card>
       </v-flex>
 </template>
@@ -27,6 +31,6 @@ export default {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
+<style>
 
 </style>

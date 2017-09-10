@@ -1,47 +1,70 @@
 <template>
-  <v-app :dark="!lightTheme">
-    <v-toolbar dark class="primary" fixed>
+  <v-app :dark="darkTheme">
+    <v-navigation-drawer absolute temporary :dark='darkTheme' v-model="drawer" overflow>
+      <v-switch class='ml-2' :label="(!darkTheme ? 'Light' : 'Dark') + ' Theme'" v-model="darkTheme" :dark="darkTheme" hide-details></v-switch>
+      <v-switch class='ml-2' :label="(!miniToolbar ? 'Full' : 'Mini') + ' Toolbar'" v-model="miniToolbar" :dark="darkTheme" hide-details></v-switch>
+
+    </v-navigation-drawer>
+
+    <v-toolbar dark :class="toolbarTheme" :dense="miniToolbar" fixed>
+      <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
       <v-toolbar-title>Some Title</v-toolbar-title>
       <v-toolbar-items>
         <v-btn flat @click.native.stop = "openImportDialog">Import</v-btn>
         <v-btn flat @click.native.stop = "openExportDialog">Export</v-btn>
         <v-btn flat>Info</v-btn>
       </v-toolbar-items>
+
+      <v-spacer></v-spacer>
+      <v-menu class="mr-3" offset-y>
+        <v-btn icon dark slot="activator">
+            <v-icon>format_paint</v-icon>
+        </v-btn>
+      <v-list>
+        <v-list-tile v-for="c in colors" :key="c" :class="c" @mouseover.native="toolbarTheme = c">
+        </v-list-tile>
+      </v-list>
+    </v-menu>
+
+
     </v-toolbar>
     <main>
       <v-container fluid>
         <v-layout row wrap>
-          <filter-section v-for='section in sections'
-              v-show='calculateSectionIsShown(section)'
-              :sectionLabel='section.categoryName'
-              :filters='section.filters'
-              :key='section.categoryName'
+          <filter-section v-for="section in sections"
+              v-show="calculateSectionIsShown(section)"
+              :sectionLabel="section.categoryName"
+              :filters="section.filters"
+              :key="section.categoryName"
+              :dark="darkTheme"
           ></filter-section>
         </v-layout>
       </v-container>
     </main>
     <div id='bottomPanel'>
       <v-layout column>
-        <v-flex lg6 offset-lg3>
+        <v-flex lg8 offset-lg2>
           <v-card class='pt-0'>
             <v-card-text class='pt-0'>
               <v-layout row justify-space-around>
-                <v-slider label="Num" hide-details v-bind:max="10" v-model="numberOfSymbolsToFetch"></v-slider>
+                <v-slider label="№" hide-details v-bind:max="10" v-model="numberOfSymbolsToFetch" thumb-label class="mr-1"></v-slider>
                 <v-text-field
                     type="number"
                     hide-details
+                    min="1"
+                    max="10"
                     v-model="numberOfSymbolsToFetch"
                 ></v-text-field>
                 <v-btn
                     primary
                     @click.native="getResults"
                 >Search</v-btn>
-                <v-btn primary @click.native="tabsVisibility = !tabsVisibility">Toggle</v-btn>
+                <v-btn primary @click.native="tabsVisibility = !tabsVisibility" v-tooltip:top="{ html: 'Toggle results' }">Toggle</v-btn>
                 <v-btn primary @click.native="clearAllFilters">Reset Filters</v-btn>
               </v-layout>
 
               <v-tabs v-show="tabsVisibility == true" class="pt-3" dark v-model="activeTab">
-                <v-tabs-bar>
+                <v-tabs-bar class="indigo darken-2">
                   <v-tabs-item
                       v-for="tab in tabsLabels"
                       :key="tab"
@@ -59,7 +82,7 @@
                     :id="tab"
                     >
 
-                  <div id="sentFilters">{{ currentTabFilters }}</div>
+                <div id="sentFilters">{{ currentTabFilters }}</div>
 
                 <v-data-table
                       :loading="resultsAreLoading"
@@ -140,6 +163,11 @@ import config from '../data/config'
 
     data () {
       return {
+        drawer: false,
+        darkTheme: false,
+        toolbarTheme: 'primary',
+        colors: ['black', 'blue', 'grey', 'green', 'purple', 'red'],
+        miniToolbar: false,
         sections: [],
         saveDialog: false,
         importDialog : false,
@@ -314,7 +342,8 @@ import config from '../data/config'
 
 
       var rightNow = new Date();
-      var newTab = rightNow.toISOString().slice(11).replace('Z', '')
+      var newTab = (rightNow.toLocaleTimeString() + ':' + rightNow.getMilliseconds()).replace(/:/g, "_")
+      //var newTab = rightNow.toISOString().slice(11).replace('Z', '')
 
       this.tabsVisibility = true
       //var newTab = 'TAB ' + (this.tabsLabels.length + 1)
@@ -384,7 +413,6 @@ import config from '../data/config'
     #sentFilters {
       margin: 10px auto;
       text-align: center;
-
     }
 
     #bottomPanel {
@@ -392,7 +420,7 @@ import config from '../data/config'
       padding-left: 16px;
       padding-right: 16px;
       position: fixed;
-      bottom: 0px;
+      bottom: 10px;
     }
 </style>
 
