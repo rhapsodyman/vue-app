@@ -1,6 +1,6 @@
 <template>
     <v-card class='mt-2 ml-1 mr-1' >
-      <v-card-text class='pb-0 pt-0'>
+      <v-card-text class='pb-0 pt-0 pr-1'>
         <v-layout row>
             <v-checkbox
                 class='pb-0 pt-0'
@@ -48,6 +48,11 @@
              :label='filter.filterLabel'
              hide-details
           ></v-text-field>
+
+          <v-btn icon v-tooltip:left="{ html: 'Top long long long long long long long long long tooltip\nesfsefsdefse' }">
+            <v-icon>info</v-icon>
+          </v-btn>
+
         </v-layout>
       </v-card-text>
     </v-card>
