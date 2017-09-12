@@ -12,8 +12,7 @@
 
             <v-select
                 v-if="filter.type == 'MultiSelect'"
-                class='pb-1 pt-3'
-                label="Select"
+                class='pb-0 pt-0'
                 :items='filter.options'
                 v-model='selected'
                 multiple
@@ -23,18 +22,16 @@
 
           <v-select
               v-if="filter.type == 'Select'"
-              class='pb-1 pt-3'
+              class='pb-0 pt-0'
               :items='filter.options'
               v-model="selected"
-              label="Select"
-              :hint='filter.filterLabel'
               single-line
               hide-details
           ></v-select>
 
           <v-switch
              v-if="filter.type == 'Switch'"
-             class='pb-1 pt-3'
+             class='pb-0 pt-0'
              :label="`${stateOfSwitch.toString()}`"
              v-model="selected"
              hide-details
@@ -43,9 +40,8 @@
 
           <v-text-field
              v-if="filter.type == 'Input'"
-             class='pb-1 pt-3'
+             class='pb-0 pt-0'
              v-model="selected"
-             :label='filter.filterLabel'
              hide-details
           ></v-text-field>
 
@@ -181,6 +177,14 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style>
+  div[role=checkbox] label {
+    margin: 10px auto;
+    display: inline-block;
+    font-size: 12px;
+    overflow: visible;
+    white-space: pre-line;
+    line-height: 12px;
+  }
 
 
 </style>

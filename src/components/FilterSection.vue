@@ -1,11 +1,10 @@
 <template>
-      <v-flex xs12 lg6>
-        <v-card class='mt-3 mr-2'>
+        <v-card class='mt-3 mr-2 pt-2'>
           <v-card-title
               class='pb-0 pr-0 pt-0 title'>
               {{sectionLabel}}
           </v-card-title>
-          <v-card-text class='pt-1 pr-1 pb-1 pl-1'>
+          <v-card-text class='pt-0 pr-1 pb-1 pl-1'>
               <app-filter
                   v-for='filter in filters'
                   :filter='filter'
@@ -13,7 +12,6 @@
               ></app-filter>
           </v-card-text>
         </v-card>
-      </v-flex>
 </template>
 
 <script>

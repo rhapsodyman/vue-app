@@ -31,14 +31,27 @@
     <main>
       <v-container fluid>
         <v-layout row wrap>
-          <filter-section v-for="section in sections"
-              v-show="calculateSectionIsShown(section)"
-              :sectionLabel="section.categoryName"
-              :filters="section.filters"
-              :key="section.categoryName"
-              :dark="darkTheme"
-          ></filter-section>
+          <v-layout column>
+            <filter-section v-for="section in leftSections"
+            v-show="calculateSectionIsShown(section)"
+            :sectionLabel="section.categoryName"
+            :filters="section.filters"
+            :key="section.categoryName"
+            :dark="darkTheme"
+            ></filter-section>
+          </v-layout>
+
+          <v-layout column>
+            <filter-section v-for="section in rightSections"
+            v-show="calculateSectionIsShown(section)"
+            :sectionLabel="section.categoryName"
+            :filters="section.filters"
+            :key="section.categoryName"
+            :dark="darkTheme"
+            ></filter-section>
+          </v-layout>
         </v-layout>
+
       </v-container>
     </main>
     <div id='bottomPanel'>
@@ -156,6 +169,8 @@
 import FilterSection from './components/FilterSection'
 import axios from 'axios'
 import config from '../data/config'
+import impFilters from '../data/filters'
+
   export default {
     components: {
         'filter-section': FilterSection
@@ -169,6 +184,8 @@ import config from '../data/config'
         colors: ['black', 'blue', 'grey', 'green', 'purple', 'red'],
         miniToolbar: false,
         sections: [],
+        leftSections: [],
+        rightSections: [],
         saveDialog: false,
         importDialog : false,
         exportedFilters : '',
@@ -393,15 +410,26 @@ import config from '../data/config'
   },
 
     mounted ()  {
-      axios.get(config.filtersUrl) // or window.filtersUrl
-        .then(response => {
-            console.info(response.data)
-            this.sections = response.data
-        })
-      .catch(error => {
-        console.log('Error fetching and parsing data', error);
-      });
-    }
+      // axios.get(config.filtersUrl) // or window.filtersUrl
+      //   .then(response => {
+      //       console.info(response.data)
+      //       this.sections = response.data
+      //   })
+      // .catch(error => {
+      //   console.log('Error fetching and parsing data', error);
+      // });
+      this.sections = impFilters
+      var left = []
+      var right = []
+
+      for (var i = 0; i < impFilters.length; i++) {
+        if (i % 2 == 0) left.push(impFilters[i])
+         else right.push(impFilters[i])
+        }
+
+        this.leftSections = left
+        this.rightSections = right
+      }
   }
 </script>
 
