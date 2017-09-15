@@ -14,12 +14,19 @@ const store = new Vuex.Store({
       //   enabled: true
       // }
     ],
-    dependantCategoriesVisibility: {
-      'Dependant category' : false
-    }
+    selectedSecType: 'STOCK',
   },
 
   getters: {
+
+    getSelectedSecType (state){
+      return state.selectedSecType;
+    },
+
+    getFiltersMap (state){
+      return state.filtersMap;
+    },
+
     getFilterByLabel: (state, getters) => (filterLabel) => {
       return state.filters.find(f => f.label === filterLabel)
     },
@@ -34,11 +41,25 @@ const store = new Vuex.Store({
   },
 
   mutations: {
+
+    setSelectedSecType( state, type ){
+      state.selectedSecType = type
+    },
+
+    setFiltersMap( state, map ){
+      state.filtersMap = map
+    },
+
     [SET_FILTER]( state, filter ){
       var ind = state.filters.findIndex(f => f.label === filter.label)
 
       if(ind == -1) state.filters.push(filter)
-      else Vue.set(state.filters, ind, filter)
+      else {
+        state.filters[ind].value = filter.value
+        state.filters[ind].enabled = filter.enabled
+        //Vue.set(state.filters, ind, filter)
+      }
+
     },
 
     [SET_FILTERS]( state, filters ){
@@ -48,7 +69,8 @@ const store = new Vuex.Store({
     [SET_ENABLED]( state, {filterLabel, enabled} ){
       var ind = state.filters.findIndex(f => f.label === filterLabel)
       if (ind != -1) {
-        Vue.set(state.filters[ind], 'enabled', enabled);
+        //state.filters[ind], 'enabled', enabled)
+        state.filters[ind].enabled = enabled
       }
     },
 
@@ -59,6 +81,15 @@ const store = new Vuex.Store({
   },
 
   actions: {
+
+    setSelectedSecType( { commit }, type) {
+      commit('setSelectedSecType', type)
+    },
+
+    setFiltersMap( { commit }, map) {
+      commit('setFiltersMap', map)
+    },
+
     setFilter( { commit }, filter) {
       commit(SET_FILTER, filter)
     },
