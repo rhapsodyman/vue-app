@@ -85,6 +85,7 @@
                       ripple
                   >
                   {{ tab }}
+                  <v-icon class="pl-1" @click.stop="removetab(tab)">cancel</v-icon>
                 </v-tabs-item>
                 <v-tabs-slider class="yellow"></v-tabs-slider>
               </v-tabs-bar>
@@ -169,7 +170,7 @@
 import FilterSection from './components/FilterSection'
 import axios from 'axios'
 import config from '../data/config'
-import impFilters from '../data/filters'
+import impFilters from '../data/filtersBig'
 
   export default {
     components: {
@@ -215,9 +216,9 @@ import impFilters from '../data/filters'
 
       calculateSectionIsShown (section) {
         var visible = true
-        if (section.categoryName === 'Dependant category') {
-          visible = this.$store.getters.getCategoriesVisibility[section.categoryName]
-        }
+        // if (section.categoryName === 'Dependant category') {
+        //   visible = this.$store.getters.getCategoriesVisibility[section.categoryName]
+        // }
         return visible
       },
 
@@ -385,6 +386,25 @@ import impFilters from '../data/filters'
         console.log('Error fetching and parsing data', error);
         this.tabsData[newTab].loading = false
       });
+    },
+
+
+    removetab (tab) {
+      console.log("inside removetab");
+
+      var index = this.tabsLabels.indexOf(tab)
+      if (this.tabsLabels.length === 1) return
+
+      if (tab === this.activeTab){
+        if ( index === this.tabsLabels.length -1) { // last tab
+          this.activeTab = this.tabsLabels[index - 1]
+        }
+        else  {
+          this.activeTab = this.tabsLabels[index +1]
+        }
+      }
+      this.tabsLabels.splice(index, 1)
+      console.log(this.tabsLabels);
     },
 
     copyToClipboard () {
