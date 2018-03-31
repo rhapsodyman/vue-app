@@ -134,7 +134,7 @@
             v-model="showMultileg"
             hide-details
         ></v-checkbox>
-        <textarea ref="exportedFilters" rows="10">{{exportedFilters}}</textarea>
+        <textarea ref="exportedFilters" v-model="exportedFilters"></textarea>
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
@@ -151,7 +151,10 @@
       <v-card-text>
 
         <v-alert warning transition="scale-transition" dismissible v-model="displayFilterWarning">
-          <li v-for="alert in filterAlerts">{{ alert }}</li>
+          <li 
+              v-for="(alert, index) in filterAlerts"
+              :key="index"
+          >{{ alert }}</li>
         </v-alert>
 
         <textarea rows="10" ref="pastedFilters" placeholder="Paste filters here"></textarea>
@@ -430,6 +433,7 @@ import impFilters from '../data/filtersBig'
   },
 
     mounted ()  {
+
       // axios.get(config.filtersUrl) // or window.filtersUrl
       //   .then(response => {
       //       console.info(response.data)

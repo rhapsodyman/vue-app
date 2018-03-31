@@ -4,11 +4,10 @@ export default [
 		"filters": [
 			{
 				"filterLabel": "Security type Security type some long name and more\n symbols adn andrei malai is the best",
-				"type": "MultiSelect",
+				"type": "Select",
 				"bindName": "SECURITY_TYPE",
-				"options": ["STOCK", "ETF", "BOND", "OPTION"]
+				"options": ["STOCK", "ETF", "OPTION"]
 			}
-
 		]
 	},
 	{
@@ -33,105 +32,34 @@ export default [
 		]
 	},
 	{
-		"categoryName": "Dependant category",
+		"categoryName": "Stock Only",
+		"aplicableFor" : ["STOCK", "ETF"],
 		"filters": [
 			{
-				"filterLabel": "max price",
-				"bindName": "M1X_P123RICE",
+				"filterLabel": "stock only1",
+				"bindName": "STOCK_ONLY_1",
 				"type": "Input"
 			},
 			{
-				"filterLabel": "Average price",
-				"bindName": "AVEsRAdGE_PRfdICE",
-				"type": "Input"
-			},
-			{
-				"filterLabel": "Some1",
-				"bindName": "AVdERAsGE_PsdRICE",
-				"type": "Input"
-			},
-			{
-				"filterLabel": "Some2",
-				"bindName": "AVERA124GE_4RICE",
-				"type": "Input"
-
-			}
-		]
-	},
-	{
-		"categoryName": "Dependant category2",
-		"filters": [
-			{
-				"filterLabel": "ma1x price",
-				"bindName": "MaghAX_PweRICE",
-				"type": "Input"
-			},
-			{
-				"filterLabel": "Aver1age price",
-				"bindName": "AVERAGE_PRkhfsdICE",
-				"type": "Input"
-			},
-			{
-				"filterLabel": "So1me1",
-				"bindName": "AVERdsfAGE_PsdfsRICE",
-				"type": "Input"
-			},
-			{
-				"filterLabel": "So1me2",
-				"bindName": "AVEsRAGsdfsE_PRICfE",
-				"type": "Input"
-
-			}
-		]
-	},
-	{
-		"categoryName": "Dependant category3",
-		"filters": [
-			{
-				"filterLabel": "ma1x price",
-				"bindName": "MdfdAX_PRIdfdCE",
-				"type": "Input"
-			},
-			{
-				"filterLabel": "Avedsr1age price",
-				"bindName": "AVERdfAGEsg_fPRsdfICE",
+				"filterLabel": "stock only2",
+				"bindName": "STOCK_ONLY_2",
 				"type": "Input"
 			}
 		]
 	},
 	{
-		"categoryName": "Depensddant category3",
+		"categoryName": "Options only",
+		"aplicableFor" : ["OPTION"],
 		"filters": [
 			{
-				"filterLabel": "ma1x pri43ce",
-				"bindName": "MAs34X_dfsPRICE",
+				"filterLabel": "Options only1",
+				"bindName": "OPTIONS_ONLY_1",
 				"type": "Input"
 			},
 			{
-				"filterLabel": "Av3edsr1age price",
-				"bindName": "AVERderAGEsdsfsdg_PRICE",
+				"filterLabel": "Options only2",
+				"bindName": "OPTIONS_ONLY_2",
 				"type": "Input"
-			}
-		]
-	},
-	{
-		"categoryName": "Other Categoqdsry",
-		"filters": [
-			{
-				"filterLabel": "Listed odwsn Market",
-				"bindName": "LISTssd45ED_ON",
-				"type": "Select",
-				"options": ["ARCA", "NASDAQ"]
-			},
-			{
-				"filterLabel": "Min sdsdprice",
-				"bindName": "MIN_erf123PRICE",
-				"type": "Input"
-			},
-			{
-				"filterLabel": "Is Shosdsdrtable",
-				"bindName": "IS_SHORdfsdTABLE",
-				"type": "Switch"
 			}
 		]
 	}

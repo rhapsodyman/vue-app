@@ -178,12 +178,12 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style>
   div[role=checkbox] label {
-    margin: 10px auto;
+    margin: 5px auto;
     display: inline-block;
     font-size: 12px;
     overflow: visible;
     white-space: pre-line;
-    line-height: 12px;
+    line-height: 18px;
   }
 
 

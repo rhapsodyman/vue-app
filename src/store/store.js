@@ -7,13 +7,13 @@ Vue.use(Vuex)
 
 const store = new Vuex.Store({
   state: {
-    filters : [
+    filters : [],
       // {
       //   label: 'SECURITY_TYPE',
       //   value: 'ETF',
       //   enabled: true
       // }
-    ],
+
     selectedSecType: 'STOCK',
   },
 
@@ -23,21 +23,13 @@ const store = new Vuex.Store({
       return state.selectedSecType;
     },
 
-    getFiltersMap (state){
-      return state.filtersMap;
-    },
-
     getFilterByLabel: (state, getters) => (filterLabel) => {
       return state.filters.find(f => f.label === filterLabel)
     },
 
     getFilters (state){
       return state.filters;
-    },
-
-    getCategoriesVisibility (state){
-      return state.dependantCategoriesVisibility;
-    },
+    }
   },
 
   mutations: {
@@ -46,11 +38,7 @@ const store = new Vuex.Store({
       state.selectedSecType = type
     },
 
-    setFiltersMap( state, map ){
-      state.filtersMap = map
-    },
-
-    [SET_FILTER]( state, filter ){
+      [SET_FILTER]( state, filter ){
       var ind = state.filters.findIndex(f => f.label === filter.label)
 
       if(ind == -1) state.filters.push(filter)
@@ -59,7 +47,6 @@ const store = new Vuex.Store({
         state.filters[ind].enabled = filter.enabled
         //Vue.set(state.filters, ind, filter)
       }
-
     },
 
     [SET_FILTERS]( state, filters ){
@@ -72,22 +59,13 @@ const store = new Vuex.Store({
         //state.filters[ind], 'enabled', enabled)
         state.filters[ind].enabled = enabled
       }
-    },
-
-    [SET_CATEGORY_ENABLED]( state, {categoryName, enabled} ){
-      state.dependantCategoriesVisibility[categoryName] = enabled
-
-    },
+    }
   },
 
   actions: {
 
     setSelectedSecType( { commit }, type) {
       commit('setSelectedSecType', type)
-    },
-
-    setFiltersMap( { commit }, map) {
-      commit('setFiltersMap', map)
     },
 
     setFilter( { commit }, filter) {
@@ -100,11 +78,7 @@ const store = new Vuex.Store({
 
     setEnabled( { commit }, {filterLabel, enabled}) {
       commit(SET_ENABLED, {filterLabel, enabled})
-    },
-
-    setCategoryEnabled( { commit }, {categoryName, enabled}) {
-      commit(SET_CATEGORY_ENABLED, {categoryName, enabled})
-    },
+    }
   }
 })
 

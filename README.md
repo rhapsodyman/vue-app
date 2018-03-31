@@ -1,4 +1,4 @@
-# gssimple
+# simple project
 
 > A Vue.js project
 
