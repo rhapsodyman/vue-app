@@ -30,28 +30,21 @@
     </v-toolbar>
     <main>
       <v-container fluid>
-        <v-layout row wrap>
-          <v-layout column>
-            <filter-section v-for="section in leftSections"
-            v-show="calculateSectionIsShown(section)"
-            :sectionLabel="section.categoryName"
-            :filters="section.filters"
-            :key="section.categoryName"
+          <filter-group v-for="group in allFilters.legs"
+            :groupLabel="group.name"
+            :sections="group.sections"
+            :key="group.name"
             :dark="darkTheme"
-            ></filter-section>
-          </v-layout>
+            :index="group.index"
+            ></filter-group>
 
-          <v-layout column>
-            <filter-section v-for="section in rightSections"
-            v-show="calculateSectionIsShown(section)"
-            :sectionLabel="section.categoryName"
-            :filters="section.filters"
-            :key="section.categoryName"
+          <filter-group v-for="group in allFilters.commonParams"
+            :groupLabel="group.name"
+            :sections="group.sections"
+            :key="group.name"
             :dark="darkTheme"
-            ></filter-section>
-          </v-layout>
-        </v-layout>
-
+            :index="group.index"
+            ></filter-group>
       </v-container>
     </main>
     <div id='bottomPanel'>
@@ -60,20 +53,13 @@
           <v-card class='pt-0'>
             <v-card-text class='pt-0'>
               <v-layout row justify-space-around>
-                <v-slider label="№" hide-details v-bind:max="10" v-model="numberOfSymbolsToFetch" thumb-label class="mr-1"></v-slider>
-                <v-text-field
-                    type="number"
-                    hide-details
-                    min="1"
-                    max="10"
-                    v-model="numberOfSymbolsToFetch"
-                ></v-text-field>
                 <v-btn
                     primary
                     @click.native="getResults"
                 >Search</v-btn>
                 <v-btn primary @click.native="tabsVisibility = !tabsVisibility" v-tooltip:top="{ html: 'Toggle results' }">Toggle</v-btn>
                 <v-btn primary @click.native="clearAllFilters">Reset Filters</v-btn>
+                <v-btn primary @click.native="addNewLeg">Add leg</v-btn>
               </v-layout>
 
               <v-tabs v-show="tabsVisibility == true" class="pt-3" dark v-model="activeTab">
@@ -127,13 +113,6 @@
         <div class="headline">Exported Filters</div>
       </v-card-title>
       <v-card-text class='pt-0 pb-0'>
-        <v-checkbox
-            @change='onShowMultilegSwitch'
-            class='pb-0 pt-0'
-            label="Show sent filters"
-            v-model="showMultileg"
-            hide-details
-        ></v-checkbox>
         <textarea ref="exportedFilters" v-model="exportedFilters"></textarea>
       </v-card-text>
       <v-card-actions>
@@ -170,14 +149,15 @@
 </template>
 
 <script>
-import FilterSection from './components/FilterSection'
+// import FilterSection from './components/FilterSection'
+import FilterGroup from './components/FilterGroup'
 import axios from 'axios'
 import config from '../data/config'
-import impFilters from '../data/filtersBig'
+import impFilters from '../data/filters'
 
   export default {
     components: {
-        'filter-section': FilterSection
+        'filter-group': FilterGroup
     },
 
     data () {
@@ -188,6 +168,7 @@ import impFilters from '../data/filtersBig'
         colors: ['black', 'blue', 'grey', 'green', 'purple', 'red'],
         miniToolbar: false,
         sections: [],
+        allFilters: {},
         leftSections: [],
         rightSections: [],
         saveDialog: false,
@@ -217,6 +198,19 @@ import impFilters from '../data/filtersBig'
 
     methods: {
 
+     getDefaultLegParams() {
+        return {
+          filters: [
+            {
+              label: 'SECURITY_TYPE',
+              value: 'STOCK',
+              enabled: true
+            }
+          ],
+          selectedSecType: 'STOCK'
+        } 
+},
+
       calculateSectionIsShown (section) {
         var visible = true
         // if (section.categoryName === 'Dependant category') {
@@ -227,17 +221,17 @@ import impFilters from '../data/filtersBig'
 
       openExportDialog () {
         this.showMultileg = false
-        this.calculateAndShowExportFilters(1)
+        this.calculateAndShowExportFiltersNew()
       },
 
-      onShowMultilegSwitch (value){
-        var number = value ? this.numberOfSymbolsToFetch : 1
-        this.calculateAndShowExportFilters(number)
-      },
+      // onShowMultilegSwitch (value){
+      //   var number = value ? this.numberOfSymbolsToFetch : 1
+      //   this.calculateAndShowExportFilters(number)
+      // },
 
       calculateExportFilters (number) {
         var finalString = ''
-        var filters = this.$store.getters.getFilters
+        var filters = this.$store.getters.getCommonFilters
         for (var i = 0; i < filters.length; i++) {
           if (filters[i].enabled) {
             var value = this.getFilterValue(filters[i].value, number)
@@ -247,17 +241,72 @@ import impFilters from '../data/filtersBig'
         return finalString
       },
 
-      calculateAndShowExportFilters (number) {
-        this.exportedFilters = this.calculateExportFilters(number)
+      calculateExportFiltersNew () {
+        var finalString = ''
+
+        // calculate leg filters
+        var legs = this.$store.getters.getAllLegFilters
+        var firstLeg = legs[0]
+
+        for (var i = 0; i < firstLeg.filters.length; i++) { // each filter from the first leg
+          var currentFilter = firstLeg.filters[i]
+          var currentFilterStr = ''
+          if (currentFilter.enabled) {
+            currentFilterStr += (currentFilter.label + '=' + currentFilter.value)
+
+            for (var j = 1; j < legs.length; j++) {  // each other leg
+              for (var k = 0; k < legs[j].filters.length; k++) {  // each filter
+                 var otherFilter = legs[j].filters[k] 
+                 if (otherFilter.label == currentFilter.label  && otherFilter.enabled) {
+                      currentFilterStr += '|' + otherFilter.value
+                  }
+              }
+            }
+            currentFilterStr += '\n'
+            console.log('Current = ' + currentFilterStr)
+          }
+          finalString += currentFilterStr
+        }
+
+
+        // calculate common filters
+        var commonFilters = this.$store.getters.getCommonFilters
+
+        for (var i = 0; i < commonFilters.length; i++) {
+          var filter = commonFilters[i]
+          if (filter.enabled){
+
+            switch (filter.label){
+              case 'SPECIAL_CASE':
+              finalString +=  filter.label + '=' + this.replicateValue(filter.value, this.allFilters.legs.length)
+              break
+              default:
+               finalString += (filter.label + '=' + filter.value + '\n')
+            }
+          }
+        }
+
+
+        return finalString
+      },
+
+      // calculateAndShowExportFilters (number) {
+      //   this.exportedFilters = this.calculateExportFilters(number)
+      //   this.saveDialog = true
+      // },
+
+      calculateAndShowExportFiltersNew () {
+        this.exportedFilters = this.calculateExportFiltersNew()
         this.saveDialog = true
       },
 
-      getFilterValue (filterValue, number) {
-        var arr = []
-        for (var i = 0; i < number; i++) {
-          arr.push(filterValue)
-        }
-        return arr.join('|')
+      replicateValue(value, times){
+          var arr = []
+          for (var i = 0; i < times; i++) {
+            arr.push(value)
+          }
+          return arr.join('|')
+
       },
 
       openImportDialog () {
@@ -275,6 +324,8 @@ import impFilters from '../data/filtersBig'
         var filters = []
 
         var noWarnings = true
+        var secTypeToSelect = 'STOCK'
+
         var lines = source.split(/\r?\n/)
         for (var i = 0; i < lines.length; i++) {
           var arr = lines[i].trim().split('=')
@@ -282,11 +333,17 @@ import impFilters from '../data/filtersBig'
           var foundFilter = this.getFilterByName(arr[0])
 
           if (foundFilter != undefined) {
+
+            var label = arr[0]
+            var value = arr[1]
+
+            if (label == 'SECURITY_TYPE') secTypeToSelect = value
+
             var newFilter = {
-              label: arr[0],
+              label: label,
               enabled: true
             }
-            var value = arr[1]
+            
             if (foundFilter.type == 'MultiSelect') value = value.split(',')
 
             var warnings = this.getFilterWarnings(foundFilter, value)
@@ -305,9 +362,8 @@ import impFilters from '../data/filtersBig'
           }
         }
 
-        if (noWarnings) {
-          // add to store
-          this.$store.dispatch('setFilters', filters )
+        if (noWarnings) {    // add to store
+          this.$store.dispatch('setLegs', [ {filters : filters, selectedSecType: secTypeToSelect}] )
           this.importDialog = false
         }
         else {
@@ -338,13 +394,31 @@ import impFilters from '../data/filtersBig'
 
       },
 
-
       clearAllFilters () {
-        this.$store.dispatch('setFilters', [] )
+        var first = this.allFilters.legs[0]
+        this.allFilters.legs = []
+        this.allFilters.legs.push(first)
+        this.$store.dispatch('setLegs', [this.getDefaultLegParams()] )
+        this.$store.dispatch('setCommonFilters', [] )
+        
+      },
+
+      addNewLeg(){
+          var nLeg = {
+          name: 'Leg ' + (this.allFilters.legs.length + 1),
+          index: this.allFilters.legs.length,
+          sections: this.allFilters.legs[0].sections
+        }
+        
+        this.$store.dispatch('addNewLeg', this.getDefaultLegParams())
+        this.allFilters.legs.push(nLeg)
+        
+        
       },
 
     getFilterByName (nameToFind) {
-      var sections = this.sections
+      var sections = this.allFilters.legs[0].sections
+
       for (var secInd = 0; secInd < sections.length; secInd++) {
         var section = sections[secInd]
         for (var fInd = 0; fInd < section.filters.length; fInd++) {
@@ -358,8 +432,9 @@ import impFilters from '../data/filtersBig'
 
     getResults () {
       // here fisrt of all need to pass arguments
-      var filtersToSend = this.calculateExportFilters(this.numberOfSymbolsToFetch)
-      var filtersToShow = this.calculateExportFilters(1)
+      // var filtersToSend = this.calculateExportFilters(this.numberOfSymbolsToFetch)
+      // var filtersToShow = this.calculateExportFilters(1)
+      var filtersToShow = this.calculateExportFiltersNew()
 
 
       var rightNow = new Date();
@@ -442,17 +517,12 @@ import impFilters from '../data/filtersBig'
       // .catch(error => {
       //   console.log('Error fetching and parsing data', error);
       // });
-      this.sections = impFilters
-      var left = []
-      var right = []
 
-      for (var i = 0; i < impFilters.length; i++) {
-        if (i % 2 == 0) left.push(impFilters[i])
-         else right.push(impFilters[i])
-        }
 
-        this.leftSections = left
-        this.rightSections = right
+      // this.$store.commit('setLegs')
+      this.$store.dispatch('setLegs', [this.getDefaultLegParams()] )
+      this.sections = impFilters  // leave it for now
+      this.allFilters = impFilters
       }
   }
 </script>
@@ -465,6 +535,7 @@ import impFilters from '../data/filtersBig'
     #sentFilters {
       margin: 10px auto;
       text-align: center;
+      white-space: pre-line;
     }
 
     #bottomPanel {

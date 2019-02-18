@@ -56,7 +56,7 @@
 
 <script>
 export default {
-  props: ['filter'],
+  props: ['filter', 'index'], // index - legId
   data () {
     return { }
   },
@@ -64,15 +64,15 @@ export default {
   computed: {
 
     stateOfSwitch() {
-      var f = this.$store.getters.getFilterByLabel(this.filter.bindName)
+      var f = this.filter.isLegFilter ? this.$store.getters.getLegFilterByLabel(this.filter.bindName, this.index) : this.$store.getters.getCommonFilterByLabel(this.filter.bindName)
       return f == undefined ? false : f.value == 'TRUE'
     },
 
     checkBoxValue: {
       get () {
-        console.log('inside checkBox GET ' + this.filter.bindName)
-        var f = this.$store.getters.getFilterByLabel(this.filter.bindName)
-        if(f != undefined && f.enabled == true){
+        // console.log('inside checkBox GET ' + this.filter.bindName)
+        var f = this.filter.isLegFilter ? this.$store.getters.getLegFilterByLabel(this.filter.bindName, this.index) : this.$store.getters.getCommonFilterByLabel(this.filter.bindName)
+        if (f != undefined && f.enabled == true){
           return true
         }
         else return false
@@ -80,13 +80,13 @@ export default {
 
       set (value) {
         console.log('inside checkBox set')
-        var f = this.$store.getters.getFilterByLabel(this.filter.bindName)
+        var f = this.filter.isLegFilter ? this.$store.getters.getLegFilterByLabel(this.filter.bindName, this.index) : this.$store.getters.getLegFilterByLabel(this.filter.bindName, this.index)
         if(value == false){
-          this.$store.dispatch('setEnabled', { filterLabel: this.filter.bindName, enabled: false })
+          this.filter.isLegFilter ? this.$store.dispatch('setLegFilterEnabled', { filterLabel: this.filter.bindName, enabled: false, legId: this.index }) : this.$store.dispatch('setCommonFilterEnabled', { filterLabel: this.filter.bindName, enabled: false })
         }
         else if (value == true) {
           if (f != undefined) { // need to enabled previously disabled filer
-            this.$store.dispatch('setEnabled', { filterLabel: this.filter.bindName, enabled: true })
+            this.filter.isLegFilter ? this.$store.dispatch('setLegFilterEnabled', { filterLabel: this.filter.bindName, enabled: true, legId: this.index }) : this.$store.dispatch('setCommonFilterEnabled', { filterLabel: this.filter.bindName, enabled: true })
           }
           else {
             var filter = {
@@ -106,7 +106,7 @@ export default {
                 filter.value = ''
               }
             }
-            this.$store.dispatch('setFilter', filter )
+            this.filter.isLegFilter ? this.$store.dispatch('setLegFilter', {filter: filter, legId: this.index} ) : this.$store.dispatch('setCommonFilter', filter)
           }
         }
       }
@@ -115,7 +115,7 @@ export default {
     selected: {
       get () {
         console.log('inside get ' + this.filter.bindName)
-        var f = this.$store.getters.getFilterByLabel(this.filter.bindName)
+        var f = this.filter.isLegFilter ? this.$store.getters.getLegFilterByLabel(this.filter.bindName, this.index) : this.$store.getters.getCommonFilterByLabel(this.filter.bindName)
 
         switch (this.filter.type) {
           case 'MultiSelect':
@@ -139,14 +139,10 @@ export default {
         // here needs to be logic for calling store if specific value is selected
 
 
-        if (this.filter.filterLabel === 'Security type') {
-          if (value == 'OPTION') {
-            this.$store.dispatch('setCategoryEnabled', { categoryName: 'Dependant category', enabled: true })
-          }
-          else {
-            this.$store.dispatch('setCategoryEnabled', { categoryName: 'Dependant category', enabled: false })
-          }
-        }
+        if (this.filter.bindName === 'SECURITY_TYPE' && !Array.isArray(value)) {
+          console.log('Setting type to value ' + value)
+          this.$store.dispatch('setSelectedSecType', {type: value, legId: this.index})
+         }
 
         switch (this.filter.type) {
           case 'MultiSelect':
@@ -162,12 +158,14 @@ export default {
           // 'SELECT' filters generate event on resetting - so I dont't want to set the value to store
           if (Array.isArray(value) && value.length == 0) {
            console.log('empty array');
-           if (this.$store.getters.getFilterByLabel(this.filter.bindName))
-              this.$store.dispatch('setFilter', filter )
+           var f = this.filter.isLegFilter ? this.$store.getters.getLegFilterByLabel(this.filter.bindName, this.index): this.$store.getters.getCommonFilterByLabel(this.filter.bindName)
+           if (f){
+              this.filter.isLegFilter ? this.$store.dispatch('setLegFilter', {filter: filter, legId: this.index} ) : this.$store.dispatch('setCommonFilter', {filter: filter} )
            }
+          }
          else {
            console.log('will be value ' + value);
-           this.$store.dispatch('setFilter', filter )
+           this.filter.isLegFilter ? this.$store.dispatch('setLegFilter', {filter: filter, legId: this.index} ) : this.$store.dispatch('setCommonFilter', {filter: filter} )
          }
       }
     }

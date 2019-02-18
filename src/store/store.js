@@ -1,84 +1,139 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import { SET_FILTER, SET_FILTERS, SET_ENABLED,  SET_CATEGORY_ENABLED } from './mutation_types'
+import { SET_LEG_FILTER, SET_LEG_FILTER_ENABLED, SET_LEGS } from './mutation_types'
 
 
 Vue.use(Vuex)
 
 const store = new Vuex.Store({
   state: {
-    filters : [],
-      // {
-      //   label: 'SECURITY_TYPE',
-      //   value: 'ETF',
-      //   enabled: true
-      // }
-
-    selectedSecType: 'STOCK',
+    legs: [],
+    commonFilters: []
   },
 
   getters: {
 
-    getSelectedSecType (state){
-      return state.selectedSecType;
+    // legs
+    getSelectedSecType: (state, getters) => (legId) => {
+      return state.legs[legId].selectedSecType;
     },
 
-    getFilterByLabel: (state, getters) => (filterLabel) => {
-      return state.filters.find(f => f.label === filterLabel)
+    getLegFilterByLabel: (state, getters) => (filterLabel, legId) => {
+      return state.legs[legId].filters.find(f => f.label === filterLabel)
     },
 
-    getFilters (state){
-      return state.filters;
+    getAllLegFilters (state){
+      return state.legs;
+    },
+
+    // common
+    getCommonFilters(state){
+      return state.commonFilters;
+    },
+
+    getCommonFilterByLabel: (state, getters) => (filterLabel) => {
+      return state.commonFilters.find(f => f.label === filterLabel)
     }
+
+    
   },
 
   mutations: {
 
-    setSelectedSecType( state, type ){
-      state.selectedSecType = type
+    // legs
+    addNewLeg( state, leg){
+      state.legs.push(leg)
     },
 
-      [SET_FILTER]( state, filter ){
-      var ind = state.filters.findIndex(f => f.label === filter.label)
+    setSelectedSecType( state, {type, legId}){
+      state.legs[legId].selectedSecType = type
+    },
 
-      if(ind == -1) state.filters.push(filter)
+      [SET_LEG_FILTER]( state, {filter, legId} ){
+      var ind = state.legs[legId].filters.findIndex(f => f.label === filter.label)
+
+      if (ind == -1) state.legs[legId].filters.push(filter)
       else {
-        state.filters[ind].value = filter.value
-        state.filters[ind].enabled = filter.enabled
+        state.legs[legId].filters[ind].value = filter.value
+        state.legs[legId].filters[ind].enabled = filter.enabled
         //Vue.set(state.filters, ind, filter)
       }
     },
 
-    [SET_FILTERS]( state, filters ){
-      state.filters = filters
+    [SET_LEGS]( state, legs ){
+      state.legs = legs
     },
 
-    [SET_ENABLED]( state, {filterLabel, enabled} ){
-      var ind = state.filters.findIndex(f => f.label === filterLabel)
+    [SET_LEG_FILTER_ENABLED]( state, {filterLabel, enabled, legId} ){
+      var ind = state.legs[legId].filters.findIndex(f => f.label === filterLabel)
       if (ind != -1) {
         //state.filters[ind], 'enabled', enabled)
-        state.filters[ind].enabled = enabled
+        state.legs[legId].filters[ind].enabled = enabled
+      }
+    },
+
+    // commmon
+    setCommonFilter( state, {filter} ){
+      var ind = state.commonFilters.findIndex(f => f.label === filter.label)
+
+      if (ind == -1) state.commonFilters.push(filter)
+      else {
+        state.commonFilters[ind].value = filter.value
+        state.commonFilters[ind].enabled = filter.enabled
+        //Vue.set(state.filters, ind, filter)
+      }
+    },
+
+    setCommonFilters( state, filters ){
+      state.commonFilters = filters
+    },
+
+    setCommonFilterEnabled( state, {filterLabel, enabled} ){
+      var ind = state.commonFilters.findIndex(f => f.label === filterLabel)
+      if (ind != -1) {
+        //state.filters[ind], 'enabled', enabled)
+        state.commonFilters[ind].enabled = enabled
       }
     }
+
   },
 
   actions: {
-
-    setSelectedSecType( { commit }, type) {
-      commit('setSelectedSecType', type)
+  // legs
+    addNewLeg( { commit }, leg) {
+      commit('addNewLeg', leg)
     },
 
-    setFilter( { commit }, filter) {
-      commit(SET_FILTER, filter)
+    setSelectedSecType( { commit }, {type, legId}) {
+      commit('setSelectedSecType', {type, legId})
     },
 
-    setFilters( { commit }, filters) {
-      commit(SET_FILTERS, filters)
+    setLegFilter( { commit }, {filter, legId}) {
+      commit(SET_LEG_FILTER, {filter, legId})
     },
 
-    setEnabled( { commit }, {filterLabel, enabled}) {
-      commit(SET_ENABLED, {filterLabel, enabled})
+    setLegs( { commit }, legs) {
+      commit(SET_LEGS, legs)
+    },
+
+    setLegFilterEnabled( { commit }, {filterLabel, enabled, legId}) {
+      commit(SET_LEG_FILTER_ENABLED, {filterLabel, enabled, legId})
+    },
+
+    // common
+    setCommonFilter( { commit }, filter) {
+      commit('setCommonFilter', filter)
+    },
+
+    setCommonFilters( { commit }, filters) {
+      commit('setCommonFilters', filters)
+    },
+
+    setCommonFilterEnabled( { commit }, {filterLabel, enabled}) {
+      commit('setCommonFilterEnabled', {filterLabel, enabled})
     }
+
+
   }
 })
 
