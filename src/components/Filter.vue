@@ -2,6 +2,7 @@
     <v-card class='mt-2 ml-1 mr-1' >
       <v-card-text class='pb-0 pt-0 pr-1'>
         <v-layout row>
+          <v-flex xs6 sm6>
             <v-checkbox
                 class='pb-0 pt-0'
                 v-bind:label="filter.filterLabel"
@@ -9,7 +10,9 @@
                 hide-details
                 color="primary"
             ></v-checkbox>
+          </v-flex>
 
+        <v-flex xs6 sm6>
             <v-select
                 v-if="filter.type == 'MultiSelect'"
                 class='pb-0 pt-0'
@@ -45,6 +48,33 @@
              hide-details
           ></v-text-field>
 
+        <v-menu
+         v-if="filter.type == 'Date'"
+          lazy
+          :close-on-content-click="false"
+          v-model="menu"
+          full-width
+          max-width="290px"
+        >
+          <v-text-field
+            slot="activator"
+            v-model="selected"
+            prepend-icon="event"
+            readonly
+            class='pb-0 pt-0'
+          ></v-text-field>
+          <v-date-picker v-model="selected" no-title scrollable actions>
+            <!-- <template scope="{ save, cancel }">
+              <v-card-actions>
+                <v-btn flat primary @click.native="cancel()">Cancel</v-btn>
+                <v-btn flat primary @click.native="save()">Save</v-btn>
+              </v-card-actions>
+            </template> -->
+          </v-date-picker>
+        </v-menu>
+        </v-flex>
+
+
           <v-btn icon v-tooltip:left="{ html: 'Top long long long long long long long long long tooltip\nesfsefsdefse' }">
             <v-icon>info</v-icon>
           </v-btn>
@@ -58,7 +88,7 @@
 export default {
   props: ['filter', 'index'], // index - legId
   data () {
-    return { }
+    return { menu: false}
   },
 
   computed: {

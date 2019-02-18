@@ -13,6 +13,12 @@ export default {
 						"bindName": "SECURITY_TYPE",
 						"options": ["STOCK", "ETF", "OPTION"],
 						"isLegFilter": true
+					},
+					{
+						"filterLabel": "Some date",
+						"type": "Date",
+						"bindName": "SOME_DATE",
+						"isLegFilter": true
 					}
 				]
 			},

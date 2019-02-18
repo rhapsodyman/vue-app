@@ -7,7 +7,8 @@
           <v-card-text class='pt-0 pr-1 pb-1 pl-1'>
 
               <v-layout row wrap>
-                <v-layout column>
+                <v-flex xs12 sm6>
+                <!-- <v-layout column> -->
                   <app-filter-section v-for="section in leftSections"
                   :sectionLabel="section.categoryName"
                   :filters="section.filters"
@@ -15,9 +16,11 @@
                   :dark="darkTheme"
                   :index="index"
                   ></app-filter-section>
-                </v-layout>
+                </v-flex>
+                <!-- </v-layout> -->
 
-                <v-layout column>
+                <!-- <v-layout column> -->
+                  <v-flex xs12 sm6>
                   <app-filter-section v-for="section in rightSections"
                   :sectionLabel="section.categoryName"
                   :filters="section.filters"
@@ -25,7 +28,8 @@
                   :dark="darkTheme"
                   :index="index"
                   ></app-filter-section>
-                </v-layout>
+                  </v-flex>
+                <!-- </v-layout> -->
               </v-layout>
           </v-card-text>
         </v-card>
